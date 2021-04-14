@@ -20,20 +20,21 @@ Plugin 'majutsushi/tagbar'
 Plugin 'vim-scripts/indexer.tar.gz'
 Plugin 'vim-scripts/DfrankUtil'
 Plugin 'vim-scripts/vimprj'
+Plugin 'mileszs/ack.vim'
 Plugin 'dyng/ctrlsf.vim'
 Plugin 'terryma/vim-multiple-cursors'
 Plugin 'scrooloose/nerdcommenter'
 Plugin 'vim-scripts/DrawIt'
 Plugin 'SirVer/ultisnips'
-Plugin 'Valloric/YouCompleteMe'
 Plugin 'derekwyatt/vim-protodef'
-Plugin 'scrooloose/nerdtree'
+Plugin 'preservim/nerdtree'
 Plugin 'fholgado/minibufexpl.vim'
 Plugin 'gcmt/wildfire.vim'
 Plugin 'sjl/gundo.vim'
 Plugin 'Lokaltog/vim-easymotion'
 Plugin 'suan/vim-instant-markdown'
 Plugin 'lilydjwg/fcitx.vim'
+Plugin 'Valloric/YouCompleteMe'
 
 call vundle#end()
 
@@ -50,6 +51,18 @@ filetype indent on
 " enable syntax hightlight and completion
 syntax on
 syntax enable
+
+autocmd FileType python set omnifunc=pythoncomplete#Complete
+autocmd FileType javascript set omnifunc=javascriptcomplete#CompleteJS
+autocmd FileType html set omnifunc=htmlcomplete#CompleteTags
+autocmd FileType css set omnifunc=csscomplete#CompleteCSS
+autocmd FileType xml set omnifunc=xmlcomplete#CompleteTags
+autocmd FileType php set omnifunc=phpcomplete#CompletePHP
+autocmd FileType c set omnifunc=ccomplete#Complete
+autocmd FileType cpp set omnifunc=ccomplete#Complete
+" TODO add sys lib ctags and the omnifunc
+let OmniCpp_DefaultNamespaces = ["_GLIBCXX_STD"]
+set tags+=/usr/include/c++/4.8.5/stdcpp.tags
 
 
 "------------------
@@ -105,6 +118,19 @@ nnoremap <c-l> <c-w>l
 
 " w!! to sudo & write a file
 cmap w!! %!sudo tee >/dev/null %
+
+"-----------------------
+" Session && Viminfo
+"-----------------------
+set sessionoptions="blank,buffers,globals,localoptions,tabpages,sesdir,folds,help,options,resize,winpos,winsize"
+" save undo history
+set undodir=~/.undo_history/
+set undofile
+" save session 
+map <leader>ss :mksession! my.vim<cr> :wviminfo! my.viminfo<cr>
+" recover session 
+map <leader>rs :source my.vim<cr> :rviminfo my.viminfo<cr>
+
 
 "--------
 " Vim UI
@@ -258,7 +284,7 @@ let g:tagbar_type_cpp = {
      \ ],
      \ 'sro'        : '::',
      \ 'kind2scope' : {
-             \ 'g' : 'enum',
+         \ 'g' : 'enum',
          \ 'n' : 'namespace',
          \ 'c' : 'class',
          \ 's' : 'struct',
@@ -272,6 +298,7 @@ let g:tagbar_type_cpp = {
          \ 'union'     : 'u'
      \ }
      \ }
+
 " traverse tags 
 nmap <Leader>tn :tnext<CR>
 nmap <Leader>tp :tprevious<CR>
@@ -286,6 +313,45 @@ nnoremap <leader>jc :YcmCompleter GoToDeclaration<CR>
 " Only #include or had openfile
 nnoremap <leader>jd :YcmCompleter GoToDefinition<CR>
 
+" CtrlSF
+nnoremap <Leader>sp :CtrlSF<CR>*/
+
+" NERD Commenter
+" <leader>cc comment
+" <leader>cu canlce comment
+
+" DrawIt
+" DrawIt --- start draw
+
+" UltiSnips
+" please place in ~/.vim/bundle/ultisnips/mysnippets
+let g:UltiSnipsSnippetDirectories=["mysnippets"]
+" UltiSnips hotkey tab confirm with YCM, so reset 
+let g:UltiSnipsExpandTrigger="<leader><tab>"
+let g:UltiSnipsJumpForwardTrigger="<leader><tab>"
+let g:UltiSnipsJumpBackwardTrigger="<leader><s-tab>"
+
+" Nerdtree 
+" file list
+nmap <Leader>fl :NERDTreeToggle<CR>
+" set win size 
+let NERDTreeWinSize=32
+" win position 
+let NERDTreeWinPos="right"
+" is show hidden file 
+let NERDTreeShowHidden=1
+" NERDTree is show verbose info 
+let NERDTreeMinimalUI=1
+" when delete file is delete buff 
+let NERDTreeAutoDeleteBuffer=1
+
+" MiniBufExplorer
+" show/hidden MiniBufExplorer
+map <Leader>bl :MBEToggle<cr>
+" buffer switch hotkey 
+map <C-Tab> :MBEbn<cr>
+map <C-S-Tab> :MBEbp<cr>
+
 "------------------
 " Useful Functions
 "------------------
@@ -297,4 +363,35 @@ autocmd BufReadPost *
       \     endif |
       \ endif
 
+
+" confirm: is need confirm
+" wholeword: is need wholeword match
+" replace: need be replace str
+function! Replace(confirm, wholeword, replace)
+    wa
+    let flag = ''
+    if a:confirm
+        let flag .= 'gec'
+    else
+        let flag .= 'ge'
+    endif
+    let search = ''
+    if a:wholeword
+        let search .= '\<' . escape(expand('<cword>'), '/\.*$^~[') . '\>'
+    else
+        let search .= expand('<cword>')
+    endif
+    let replace = escape(a:replace, '/\&~')
+    execute 'argdo %s/' . search . '/' . replace . '/' . flag . '| update'
+endfunction
+
+" not confirm not wholeword 
+nnoremap <Leader>R :call Replace(0, 0, input('Replace '.expand('<cword>').' with: '))<CR>
+" not confirm wholeword 
+nnoremap <Leader>rw :call Replace(0, 1, input('Replace '.expand('<cword>').' with: '))<CR>
+" confirm not wholeword 
+nnoremap <Leader>rc :call Replace(1, 0, input('Replace '.expand('<cword>').' with: '))<CR>
+" confirm wholeword 
+nnoremap <Leader>rcw :call Replace(1, 1, input('Replace '.expand('<cword>').' with: '))<CR>
+nnoremap <Leader>rwc :call Replace(1, 1, input('Replace '.expand('<cword>').' with: '))<CR>
 
