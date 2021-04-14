@@ -14,8 +14,8 @@ sudo ./configure --with-features=huge \
     --enable-rubyinterp \
     --enable-luainterp \
     --enable-perlinterp \
-    --enable-pythoninterp \
-    --with-python-config-dir=/usr/lib64/python2.7/config/ \
+    # --enable-pythoninterp \
+    # --with-python-config-dir=/usr/lib64/python2.7/config/ \
     --enable-python3interp \
     --with-python3-config-dir=/usr/local/lib/python3.9/config-3.9-x86_64-linux-gnu/ \
     --enable-gui=gtk2 \
