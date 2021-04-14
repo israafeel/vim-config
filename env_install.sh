@@ -21,7 +21,7 @@ sudo ./configure --with-features=huge \
     --enable-gui=gtk2 \
     --enable-cscope \
     --enable-fail-if-missing \
-    --prefix=/usr/local > ../output
+    --prefix=/usr/local > output
 cd src
 make
 make install
